@@ -32,6 +32,22 @@
         <span class="badge text-bg-secondary">Out of stock</span>
       {% endif %}
     </div>
+
+    <!-- ✅ Pay with M-Pesa Button -->
+    {% if item.stock and item.stock > 0 %}
+    <div class="mt-4">
+      <form id="mpesaForm">
+        <input type="hidden" id="amount" value="{{ item.sale_price if item.sale_price and item.sale_price < item.price else item.price }}">
+        <div class="mb-2">
+          <input type="text" id="phone" class="form-control" placeholder="Enter M-Pesa phone (07XXXXXXXX)">
+        </div>
+        <button type="button" id="payMpesa" class="btn btn-success w-100">
+          Pay with M-Pesa
+        </button>
+      </form>
+      <div id="mpesaMessage" class="mt-2 small"></div>
+    </div>
+    {% endif %}
   </div>
 </div>
 
@@ -52,4 +68,30 @@
   {% endfor %}
 </div>
 {% endif %}
+
+<!-- ✅ JS: Handle STK Push -->
+<script>
+document.getElementById("payMpesa")?.addEventListener("click", async () => {
+  const phone = document.getElementById("phone").value.trim();
+  const amount = document.getElementById("amount").value;
+  const msgEl = document.getElementById("mpesaMessage");
+  msgEl.innerHTML = "Processing payment...";
+
+  try {
+    const res = await fetch("{{ url_for('mpesa.stk_push') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone_number: phone, amount: amount, account_ref: "{{ item.slug }}" })
+    });
+    const data = await res.json();
+    if (res.ok && data.ok !== false) {
+      msgEl.innerHTML = `<span class="text-success">STK Push sent! Check your phone to complete payment.</span>`;
+    } else {
+      msgEl.innerHTML = `<span class="text-danger">Payment failed: ${data.error || "Unknown error"}</span>`;
+    }
+  } catch (err) {
+    msgEl.innerHTML = `<span class="text-danger">Error: ${err.message}</span>`;
+  }
+});
+</script>
 {% endblock %}

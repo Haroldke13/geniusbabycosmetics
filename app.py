@@ -11,6 +11,18 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from config import Config
 
+from flask import Flask
+from flask_pymongo import PyMongo
+from config import Config
+from mail_init import init_mail
+from contact_bp import contact_bp
+from payments_mpesa import mpesa_bp
+
+mongo = PyMongo()
+
+    
+
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -22,6 +34,14 @@ def create_app():
     client = MongoClient(app.config["MONGO_URI"])
     db = client[app.config["MONGO_DB_NAME"]]
     app.mongo = db
+    
+    
+    mongo.init_app(app)
+    app.mongo = mongo.db
+
+    init_mail(app)
+    app.register_blueprint(contact_bp)
+    app.register_blueprint(mpesa_bp)
 
     # Ensure indexes
     ensure_indexes(db)
@@ -239,3 +259,6 @@ def slugify(s: str) -> str:
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
     s = re.sub(r"[^a-zA-Z0-9]+", "-", s).strip("-").lower()
     return s
+
+
+   

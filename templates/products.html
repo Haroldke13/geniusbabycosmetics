@@ -51,9 +51,14 @@
   {% for p in items %}
     <div class="col">
       <div class="card h-100">
-        <img src="{{ p.image_url or url_for('static', filename='img/placeholder.svg') }}" class="card-img-top" alt="{{ p.name }}">
+        <img src="{{ p.image_url or url_for('static', filename='img/placeholder.svg') }}"
+             class="card-img-top" alt="{{ p.name }}">
         <div class="card-body">
-          <h3 class="h6 card-title"><a class="text-decoration-none" href="{{ url_for('product_detail', slug_or_id=p.slug) }}">{{ p.name }}</a></h3>
+          <h3 class="h6 card-title">
+            <a class="text-decoration-none" href="{{ url_for('product_detail', slug_or_id=p.slug) }}">
+              {{ p.name }}
+            </a>
+          </h3>
           <p class="mb-1">
             {% if p.sale_price and p.sale_price < p.price %}
               <span class="text-muted text-decoration-line-through">{{ p.price|money }}</span>
@@ -63,6 +68,23 @@
             {% endif %}
           </p>
           <div class="small text-muted">{{ p.brand }} • {{ p.category }}</div>
+
+          <!-- ✅ Pay with M-Pesa form -->
+          {% if p.stock and p.stock > 0 %}
+          <form class="mpesaForm mt-2">
+            <input type="hidden" class="amount"
+                   value="{{ p.sale_price if p.sale_price and p.sale_price < p.price else p.price }}">
+            <input type="hidden" class="account_ref" value="{{ p.slug }}">
+            <input type="text" class="form-control form-control-sm phone mb-1"
+                   placeholder="07XXXXXXXX">
+            <button type="button" class="btn btn-sm btn-success w-100 payBtn">
+              Pay with M-Pesa
+            </button>
+            <div class="small mt-1 msg"></div>
+          </form>
+          {% else %}
+          <span class="badge text-bg-secondary">Out of stock</span>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -73,8 +95,6 @@
 <nav class="mt-4 d-flex justify-content-center">
   <ul class="pagination justify-content-center">
 
-
-    {# Show at most 10 numbered pages #}
     {% set window = 10 %}
     {% set start = page - (window // 2) + 1 %}
     {% if start < 1 %}{% set start = 1 %}{% endif %}
@@ -85,7 +105,6 @@
       {% if start < 1 %}{% set start = 1 %}{% endif %}
     {% endif %}
 
-    {# Numbered page links #}
     {% for p in range(start, end + 1) %}
       <li class="page-item {{ 'active' if p == page else '' }}">
         <a class="page-link"
@@ -96,7 +115,6 @@
       </li>
     {% endfor %}
 
-    {# Next button #}
     <li class="page-item {{ 'disabled' if page >= pages else '' }}">
       <a class="page-link"
          href="{{ url_for('products',
@@ -110,4 +128,33 @@
 </nav>
 {% endif %}
 
+<!-- ✅ JS handler for multiple Pay with M-Pesa forms -->
+<script>
+document.querySelectorAll(".mpesaForm").forEach(form => {
+  const btn = form.querySelector(".payBtn");
+  btn.addEventListener("click", async () => {
+    const phone = form.querySelector(".phone").value.trim();
+    const amount = form.querySelector(".amount").value;
+    const ref = form.querySelector(".account_ref").value;
+    const msgEl = form.querySelector(".msg");
+    msgEl.innerHTML = "Processing...";
+
+    try {
+      const res = await fetch("{{ url_for('mpesa.stk_push') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone_number: phone, amount: amount, account_ref: ref })
+      });
+      const data = await res.json();
+      if (res.ok && data.ok !== false) {
+        msgEl.innerHTML = `<span class="text-success">STK Push sent! Check your phone.</span>`;
+      } else {
+        msgEl.innerHTML = `<span class="text-danger">Failed: ${data.error || "Unknown error"}</span>`;
+      }
+    } catch (err) {
+      msgEl.innerHTML = `<span class="text-danger">Error: ${err.message}</span>`;
+    }
+  });
+});
+</script>
 {% endblock %}
