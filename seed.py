@@ -205,25 +205,16 @@ def _random_name():
 
 # --- Cosmetic Image Pool (no API) ---
 COSMETIC_IMAGES = [
-    # Lipsticks
-    "https://images.unsplash.com/photo-1600185365778-5a3c2c8b7d9c?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1589987607627-3c8bca9d24e3?q=80&w=1200&auto=format&fit=crop",
-    # Foundations
-    "https://images.unsplash.com/photo-1604654894611-56c3e65f6e7e?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1616715702651-5721a4db71e1?q=80&w=1200&auto=format&fit=crop",
-    # Skincare & serums
-    "https://images.unsplash.com/photo-1582725466689-4aa1b92f5474?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1606813909021-fc81c44d4948?q=80&w=1200&auto=format&fit=crop",
-    # Perfume
-    "https://images.unsplash.com/photo-1612197524749-379f3c7a6a07?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1600185365693-2c4ff7aa3a1a?q=80&w=1200&auto=format&fit=crop",
-    # Nail polish
-    "https://images.unsplash.com/photo-1589986461258-c881c0d55c8d?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1615195501633-4b44e6d0afc3?q=80&w=1200&auto=format&fit=crop",
-    # Haircare
-    "https://images.unsplash.com/photo-1589985801579-356e33f4dd07?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1600185366046-2d3b6fa0c8a2?q=80&w=1200&auto=format&fit=crop",
-]
+    "https://im.idiva.com/content/2023/Apr/1-66_643e75b0c37b6.jpg?w=900&h=675&cc=1",
+    "https://lfactorcosmetics.com/cdn/shop/articles/Essential_makeup_products.jpg?v=1701681592",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKHQv8G9ZTSr_ga1KBy-ntsZ6GKaDJjDr8Gg&s",
+    "https://m.media-amazon.com/images/I/71W25WUkTUL._AC_UF1000,1000_QL80_.jpg",
+    "https://www.ubuy.ke/productimg/?image=aHR0cHM6Ly9tLm1lZGlhLWFtYXpvbi5jb20vaW1hZ2VzL0kvNzFPK3A2LWpGbUwuX1NMMTUwMF8uanBn.jpg",
+    "https://thumbs.dreamstime.com/b/set-various-watercolor-decorative-cosmetic-makeup-products-beauty-items-mascara-lipstick-foundation-cream-brushes-eye-shadow-69331688.jpg",
+    "https://i.pinimg.com/736x/ba/73/66/ba736612e254ea4c1ed5fd9ad180d09d.jpg"
+    
+    ]
+
 
 def _random_image_url() -> str:
     """Pick a random cosmetic image from curated pool."""
