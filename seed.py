@@ -66,6 +66,9 @@ SHADE_NAMES = [
     "Naivasha Rose", "Diani Coral", "Maasai Red", "Lakeview Plum", "Turkana Bronze"
 ]
 
+
+
+
 # Fallback stock images
 SAMPLE_IMAGES = [
     "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1200&auto=format&fit=crop",
@@ -183,56 +186,6 @@ MARKET_NAMES: Dict[str, List[Tuple[str, str]]] = {
     ],
 }
 
-# --- Openverse image search ---
-def _find_image_openverse(query: str, timeout: float) -> Optional[str]:
-    if requests is None:
-        return None
-    try:
-        r = requests.get(
-            "https://api.openverse.org/v1/images/",
-            params={"q": query, "page_size": 1, "license_type": "all"},
-            headers={"User-Agent": "geniusbabycosmetics-seeder/1.0"},
-            timeout=timeout,
-        )
-        if r.status_code == 200:
-            data = r.json()
-            results = data.get("results") or []
-            if results:
-                return results[0].get("url") or results[0].get("thumbnail")
-    except Exception:
-        return None
-    return None
-
-def _image_for_doc_or_rename(doc: dict, timeout: float, sleep_ms: int) -> str:
-    """Try to find an image for doc['name'] on Openverse; otherwise rename to a market name and retry.
-       Returns an image URL or a fallback sample image."""
-    enabled = _get_env_bool("IMAGE_SEARCH_ENABLED", True)
-    if not enabled or requests is None:
-        return choice(SAMPLE_IMAGES)
-
-    # 1) Try original product name
-    url = _find_image_openverse(doc["name"], timeout)
-    if url:
-        return url
-    time.sleep(sleep_ms / 1000.0)
-
-    # 2) Rename to a known market name per category and retry with its query
-    options = MARKET_NAMES.get(doc["category"]) or []
-    if options:
-        market_name, q = choice(options)
-        doc["name"] = market_name
-        doc["slug"] = slugify(market_name)
-        # adjust brand from first word of the market name
-        first = market_name.split()[0]
-        if first:
-            doc["brand"] = first
-        url = _find_image_openverse(q, timeout)
-        if url:
-            return url
-
-    # 3) Fallback
-    return choice(SAMPLE_IMAGES)
-
 def _random_price_ks():
     base = uniform(299, 4999)
     return round(base / 10) * 10
@@ -249,6 +202,33 @@ def _random_name():
     cat = choice(CATEGORIES)
     shade = "" if randint(0,1)==0 else f" — {choice(SHADE_NAMES)}"
     return f"{brand} {style} {cat}{shade}"
+
+# --- Cosmetic Image Pool (no API) ---
+COSMETIC_IMAGES = [
+    # Lipsticks
+    "https://images.unsplash.com/photo-1600185365778-5a3c2c8b7d9c?q=80&w=1200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1589987607627-3c8bca9d24e3?q=80&w=1200&auto=format&fit=crop",
+    # Foundations
+    "https://images.unsplash.com/photo-1604654894611-56c3e65f6e7e?q=80&w=1200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1616715702651-5721a4db71e1?q=80&w=1200&auto=format&fit=crop",
+    # Skincare & serums
+    "https://images.unsplash.com/photo-1582725466689-4aa1b92f5474?q=80&w=1200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1606813909021-fc81c44d4948?q=80&w=1200&auto=format&fit=crop",
+    # Perfume
+    "https://images.unsplash.com/photo-1612197524749-379f3c7a6a07?q=80&w=1200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1600185365693-2c4ff7aa3a1a?q=80&w=1200&auto=format&fit=crop",
+    # Nail polish
+    "https://images.unsplash.com/photo-1589986461258-c881c0d55c8d?q=80&w=1200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1615195501633-4b44e6d0afc3?q=80&w=1200&auto=format&fit=crop",
+    # Haircare
+    "https://images.unsplash.com/photo-1589985801579-356e33f4dd07?q=80&w=1200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1600185366046-2d3b6fa0c8a2?q=80&w=1200&auto=format&fit=crop",
+]
+
+def _random_image_url() -> str:
+    """Pick a random cosmetic image from curated pool."""
+    return choice(COSMETIC_IMAGES)
+
 
 def _build_doc(timeout: float, sleep_ms: int):
     price = _random_price_ks()
@@ -267,17 +247,17 @@ def _build_doc(timeout: float, sleep_ms: int):
         "description": choice(DESCRIPTIONS),
         "ingredients": choice(INGREDIENTS),
         "skin_type": choice(SKIN_TYPES),
-        "image_url": None,
+        "image_url": _random_image_url(),   # << replaced Openverse with local pool
         "rating": round(uniform(4.0, 5.0), 1),
         "stock": randint(10, 500),
         "is_featured": randint(0, 9) == 0,
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow(),
     }
-    doc["image_url"] = _image_for_doc_or_rename(doc, timeout, sleep_ms)
     return doc
 
-def run(additional=100, chunk_size=250):
+
+def run(additional=1000, chunk_size=250):
     app = create_app()
     db = app.mongo
     coll = db.products
@@ -324,4 +304,4 @@ def run(additional=100, chunk_size=250):
     print(f"Inserted {created} new products (Openverse-only image lookup={'enabled' if _get_env_bool('IMAGE_SEARCH_ENABLED', True) and requests else 'disabled'}).")
 
 if __name__ == "__main__":
-    run(additional=100)
+    run(additional=1000)
