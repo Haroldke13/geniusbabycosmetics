@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="py-4">
+  <div class="p-5 mb-4 bg-light rounded-3">
+    <div class="container-fluid py-5">
+      <h1 class="display-6 fw-bold">Beauty that loves you back.</h1>
+      <p class="col-md-8 fs-5">Clean, vibrant, and designed for every skin tone — discover the GeniusBaby range.</p>
+      <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg">Shop Products</a>
+    </div>
+  </div>
+</section>
+
+{% if featured %}
+<section class="mb-5">
+  <h2 class="h4 mb-3">Featured</h2>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+    {% for p in featured %}
+      <div class="col">
+        <div class="card h-100">
+          <img src="{{ p.image_url or url_for('static', filename='img/placeholder.svg') }}" class="card-img-top" alt="{{ p.name }}">
+          <div class="card-body">
+            <h3 class="h6 card-title"><a class="text-decoration-none" href="{{ url_for('product_detail', slug_or_id=p.slug) }}">{{ p.name }}</a></h3>
+            <p class="mb-1">
+              {% if p.sale_price and p.sale_price < p.price %}
+                <span class="text-muted text-decoration-line-through">{{ p.price|money }}</span>
+                <span class="fw-bold text-danger">{{ p.sale_price|money }}</span>
+              {% else %}
+                <span class="fw-bold">{{ p.price|money }}</span>
+              {% endif %}
+            </p>
+            <div class="small text-muted">{{ p.brand }} • {{ p.category }}</div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 mb-0">Latest arrivals</h2>
+    <div>
+      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('products') }}">Browse all</a>
+    </div>
+  </div>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+    {% for p in latest %}
+      <div class="col">
+        <div class="card h-100">
+          <img src="{{ p.image_url or url_for('static', filename='img/placeholder.svg') }}" class="card-img-top" alt="{{ p.name }}">
+          <div class="card-body">
+            <h3 class="h6 card-title"><a class="text-decoration-none" href="{{ url_for('product_detail', slug_or_id=p.slug) }}">{{ p.name }}</a></h3>
+            <p class="mb-1">
+              {% if p.sale_price and p.sale_price < p.price %}
+                <span class="text-muted text-decoration-line-through">{{ p.price|money }}</span>
+                <span class="fw-bold text-danger">{{ p.sale_price|money }}</span>
+              {% else %}
+                <span class="fw-bold">{{ p.price|money }}</span>
+              {% endif %}
+            </p>
+            <div class="small text-muted">{{ p.brand }} • {{ p.category }}</div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="contact" class="mt-5">
+  <div class="row g-4">
+    <div class="col-md-6">
+      <h2 class="h4">Contact us</h2>
+      <form method="post" action="{{ url_for('contact_submit') }}" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Name</label>
+          <input class="form-control" name="name" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" name="email" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Message</label>
+          <textarea class="form-control" name="message" rows="4" required></textarea>
+        </div>
+        <div class="col-12">
+          <button class="btn btn-primary">Send</button>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-6">
+      <h2 class="h4">About GeniusBaby</h2>
+      <p>We make high-performance cosmetics with skin-loving ingredients. Our formulations are tested for comfort, shade range, and lasting wear.</p>
+      <ul class="list-unstyled small">
+        <li>• Nairobi, Kenya</li>
+        <li>• Open Mon–Sat, 9am–6pm</li>
+        <li>• Email: hello@geniusbabycosmetics.com</li>
+      </ul>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0" stop-color="#ffd1e6"/>
+      <stop offset="1" stop-color="#ffeef6"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#g)"/>
+  <text x="50%" y="50%" text-anchor="middle" font-size="42" fill="#ff5fa2" font-family="Arial, Helvetica">GeniusBaby Cosmetics</text>
+</svg>
